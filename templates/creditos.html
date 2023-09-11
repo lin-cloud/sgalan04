@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Créditos</title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <script src="/static/lib/jquery-1.12.4.js"></script>
+    <script src="/static/lib/jquery-ui.js"></script>
+    <script src="/static/lib/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/estilos.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <script src="/static/lib/kendo.all.min.js"></script>
+    <link rel="stylesheet" href="/static/css/kendo.common-bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/css/kendo.bootstrap.min.css" />
+</head>
+
+<body>
+    <script type="text/javascript">
+        var url = "lang/autodetect";
+        $("#panelbar").kendoPanelBar();
+
+        $.getJSON(url, function(data){
+            $('#h1_credits').text(data.h1_login);
+            $('#h2_credits').text(data.h2_credits);
+            $('#h1_login').text(data.h1_login);
+            $('#return').text(data.return);
+
+            $('#h1_menu').text(data.h1_menu);
+            $('#ecg').text(data.ecg);
+            $('#ecg_done').text(data.ecg_done);
+            $('#patients').text(data.patients);
+            $('#logout').text(data.logout);
+            $('#ecg_pop').text(data.ecg);
+            $('#ecg_done_pop').text(data.ecg_done);
+            $('#patients_pop').text(data.patients);
+            $('#logout_pop').text(data.logout);
+            $('#ecg_menu').text(data.ecg);
+            $('#ecg_done_menu').text(data.ecg_done);
+            $('#patients_menu').text(data.patients);
+            $('#logout_menu').text(data.logout);
+
+            $('#university').text(data.university);
+            $('#h3_login').text(data.h3_login);
+            $('title').text(data.h2);
+            $('#quiron').text(data.quiron);
+            $('#sas').text(data.sas);
+            $('#avs').text(data.avs);
+            localStorage.setItem('languages', JSON.stringify(data));
+        });
+
+
+        function login() {
+            var form_data = new FormData();
+            form_data.append('username', $('#username').val());
+            form_data.append('password', $('#password').val());
+            $.ajax({
+                type: 'POST',
+                url: '/login',
+                data: form_data,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function(data) {
+                    location = '/';
+                }
+            })
+        }
+    </script>
+
+    <header id="masthead">
+        <div class="contnr">
+            <div class="project-title">
+                <h2 id="project_title"></h2>
+            </div>
+            <div class="back_cntnr"><a href="/" id="return"></a></div>
+            <h1 id="h1_patients"></h1>
+        </div>
+    </header>
+
+
+    <section id="mastsect">
+        <div class="contnr">
+            <h2 id="h2_credits"></h2>
+
+            <p class="p1">
+                This work has been supported by the Research Project “ESTIMACIÓN INTELIGENTE DE NIVELES DE RIESGO DE APARICIÓN DE ARRITMIAS
+                GRAVES PRODUCIDAS POR LA COMBINACIÓN DE FÁRMACOS INDICADOS CONTRA EL COVID-19” (CV20-84873), which has been funded by the
+                Andalusian Government.
+            </p>
+
+            <p style="font-weight: bold;">Participants</p>
+
+            <p class="p1">
+                Principal researcher:
+                Dr. Sebastián García Galán, University of Jaén
+            </p>
+
+            <p class="p1">
+                Researchers:
+            </p>
+
+            <ul class="p1">
+                <li>Dr. José Ángel Cabrera Rodríguez, Cardiology Service, Hospital Universitario QuirónSalud Madrid.</li>
+                <li>Dra. Antonia Galán Dávila, Respiratory Medicine Department Hospital General Universitario de Elda.</li>
+                <li>Dr. Nicolás Ruiz Reyes, University of Jaén.</li>
+                <li>Dra. Juana M. López López, Cardiology Service, Hospital San Agustín de Linares.</li>
+                <li>Dra. Patricia Castellano García, Cardiology Service Complejo Hospitalario de Jaén.</li>
+                <li>Dr. Alfonso Cruz Lendínez, University of Jaén.</li>
+                <li>Dr. Pedro Vera Candeas, Universidad de Jaén.</li>
+                <li>Dr. J. Enrique Muñoz Expósito, University of Jaén.</li>
+                <li>Dra. Rocío J. Pérez de Prado, University of Jaén.</li>
+                <li>Dr. Francisco J. Cañadas Quesada, University of Jaén.</li>
+                <li>Dr. Raúl Mata Campos, University of Jaén.</li>
+                <li>Dr. Damián Martínez Muñoz, University of Jaén.</li>
+                <li>Dr. Juan de la Torre Cruz, University of Jaén.</li>
+                <li>Dr. Antonio J. Muñoz Montoro, University of Jaén.</li>
+				<li>Marina Fernández Pérez, University of Jaén.</li>
+            </ul>
+
+            <p class="p1">
+                &nbsp;
+            </p>
+
+            <div class="credits">
+                 <div class="credit">
+                    <img src="/static/images/logo-uja-epsl.png" width="150">
+                    <p id="university"></p>
+                </div>
+
+                <div class="credit">
+                    <img src="/static/images/logo-quiron.png" width="250">
+                </div>
+
+                <div class="credit">
+                    <img src="/static/images/logo-sas.svg" width="150">
+                    <p id="sas"></p>
+                </div>
+
+                <div class="credit">
+                    <img src="/static/images/logo-avs.png" width="300" />
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+
+</html>

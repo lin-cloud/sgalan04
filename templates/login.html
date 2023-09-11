@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <script src="/static/lib/jquery-1.12.4.js"></script>
+    <script src="/static/lib/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/estilos.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/fonts.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+</head>
+
+<body>
+    <script type="text/javascript">
+        var url = "lang/autodetect";
+        $.getJSON(url, function(data){
+            $('#project_title').text(data.project_title);
+            $('#h1_login').text(data.h1_login);
+            $('#h2_login').text(data.h2_login);
+            $('#h2_credits').text(data.h2_credits);
+            $('#login').val(data.login);
+            $('#h3_login').text(data.h3_login);
+            $('title').text(data.h2);
+            $('#quiron').text(data.quiron);
+            $('#sas').text(data.sas);
+            $('#avs').text(data.avs);
+            localStorage.setItem('languages', JSON.stringify(data));
+        });
+
+
+
+        function login() {
+            var form_data = new FormData();
+            form_data.append('username', $('#username').val());
+            form_data.append('password', $('#password').val());
+            $.ajax({
+                type: 'POST',
+                url: '/login',
+                data: form_data,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function(data) {
+                    location = '/';
+                }
+            })
+        }
+    </script>
+    <header id="masthead">
+        <div class="contnr">
+            <div class="project-title">
+                <h2 id="project_title"></h2>
+            </div>
+        </div>
+    </header>
+    <section id="mastsect">
+        <div class="contnr">
+            <h2 id="h2_login"></h2>
+
+            <div class="login_form_cnt">
+                <div class="input-contenedor">
+                    <img class="icon" src="static/icons/user-md-solid.svg" style="width: 6%;"/>
+                    <input type="text" id="username" placeholder=" user" maxlength="8">
+                </div>
+
+                <div class="input-contenedor">
+                    <img class="icon" src="static/icons/key-solid.svg" style="width: 6%;"/>
+                    <input type="password" id="password" placeholder="password" maxlength="8">
+                </div>
+
+                <input type="button" id="login" value="" class="button" onclick="login()">
+            </div>
+
+            <!-- <div class="sep"></div> -->
+
+
+            <div class="credits">
+                <a href="creditos"><p id="h2_credits"></p></a>
+                                 <div class="credit">
+                    <img src="/static/images/logo-uja-epsl.png" width="150">
+                    <p id="university"></p>
+                </div>
+
+                <div class="credit">
+                    <img src="/static/images/logo-quiron.png" width="250">
+                </div>
+
+                <div class="credit">
+                    <img src="/static/images/logo-sas.svg" width="150">
+                    <p id="sas"></p>
+                </div>
+
+                <div class="credit">
+                    <img src="/static/images/logo-avs.png" width="300" />
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+
+</html>

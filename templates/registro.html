@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>REGISTRO DE PACIENTES</title>
+	<meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="/static/css/estilos.css">
+</head>
+<body>
+    <h2>Alta/modificación de pacientes</h2>
+	<form class="formulario" name="administracion" action="#" method="post">
+			<div class="contenedor">
+				<div class="input-contenedor">
+					<i class="far fa-id-card icon"></i>
+					<img class="icon" src="static/icons/id-card-regular.svg"/>
+					<input type="text" name="dni" id="dni" placeholder="DNI" maxlength="9">
+				</div>
+
+				<div class="input-contenedor">
+					<i class="fas fa-user icon"></i>
+					<input type="text" name="nombre" id="nombre" placeholder="Nombre" maxlength="20">
+				</div>
+
+				<div class="input-contenedor">
+					<i class="fas fa-user icon"></i>
+					<input type="text" name="apellidos" id="apellidos" placeholder="Apellidos" maxlength="30">
+				</div>
+
+				<div class="input-contenedor">
+					<i class="far fa-user icon"></i>
+					<input type="text" name="fecnac" id="fecnac" placeholder="Fecha nacimiento - 34 años" maxlength="10">
+				</div>
+
+				<div class="input-contenedor">
+					<i class="far fa-user icon"></i>
+						<select class="select-css" name="sexo" id="sexo">
+							<option value='Hombre'>Hombre</option>
+							<option value='Mujer'>Mujer</option>
+						</select>
+				</div>
+
+				<div class="input-contenedor">
+					<div><i class="far fa-hospital icon"></i></div>
+					<textarea name="observaciones" id="observaciones" placeholder="Observaciones" wrap="off"  rows="2"></textarea>
+				</div>
+
+				<input type="submit" value="Guardar" class="button">
+
+				<p>¿Deseas regresar a Menu? <a class="link" href="/menu">Enlace a Menu</a></p>
+			</div>
+	</form>
+
+	
+</body>
+</html>

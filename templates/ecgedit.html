@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ECG EDIT</title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <script src="/static/lib/jquery-1.12.4.js"></script>
+    <script src="/static/lib/jquery-ui.js"></script>
+    <script src="/static/lib/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/estilos.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <script src="/static/lib/jquery.imgareaselect.js"></script>
+    <link rel="stylesheet" href="/static/css/imgareaselect-animated.css">
+</head>
+
+<body>
+    <script type="text/javascript">
+        var contexto_valor;
+        var language;
+        var show_qtc_type;
+        var qtc_type;
+        var Pacientes = [];
+        var id;
+        var qtc, qtc_man;
+        var x1_c=0, y1_c=0, x2_c=0, y2_c=0;
+
+        var x1=0, y1=0, x2=0, y2=0;
+        var anchura=0, altura=0, real_altura=0, real_anchura=0, img_altura, img_anchura;
+        var filename;
+        var reader = new FileReader();
+        var base64result;
+        var dni;
+        var newImage = 0;
+
+
+    $( document ).ready(function() {
+
+        $( function() {
+          $( "#tabs" ).tabs();
+         } );
+
+        // id contiene el id de la ECG editada
+        id    = '{{ data.id }}';
+        qtc_type = '{{ data.qtc_type }}';
+        if ((qtc_type==80) | (qtc_type==81)) {
+            $("#qtc_type_0").show();
+            $("#qtc_type_1").show();
+            show_qtc_type = 1;
+            $('#basal').prop('checked', true);
+            if (qtc_type==80){
+                $('#qtc_type_0').attr('checked', true);
+            }
+            else{
+                $('#qtc_type_1').attr('checked', true);
+            }
+        }
+        else{
+            $("#qtc_type_0").hide();
+            $("#qtc_type_1").hide();
+            show_qtc_type = 0;
+        }
+
+        // Obtiene los datos de la ECG llamando al servicio ecgrow
+        $.getJSON("/ecgrow?id=" + id,
+            function(data) {
+                Pacientes = data;  // almacena en Pacientes los datos de la ECG
+                dni = Pacientes[0].dni;
+                qtc = Pacientes[0].qtc;
+                qtc_man = Pacientes[0].qtc_man;
+                if (Pacientes[0].fullimageclipping=='')
+                    Pacientes[0].fullimageclipping = '0,0,0,0';
+                fullimageclipping = Pacientes[0].fullimageclipping.split(',');
+                // Obtiene los datos personales del paciente
+                $.getJSON("/registro?dni=" + dni,
+                    function(data) {
+                        // Almacena en Pacientes los datos personales
+                        Pacientes[0].nombre = data[0].nombre;
+                        Pacientes[0].apellidos = data[0].apellidos;
+                        Pacientes[0].iam = data[0].iam;
+                        Pacientes[0].cardiaco = data[0].cardiaco;
+                        Pacientes[0].fecnac = data[0].fecnac;
+                        Pacientes[0].sexo = data[0].sexo;
+
+                        // Muestra en pantalla datos de la ECG y de paciente
+                         $('input[name="diuretico"][value="' + Pacientes[0].diuretico + '"]').prop('checked', true)
+                         $('input[name="suero"][value="' + Pacientes[0].suero + '"]').prop('checked', true)
+                         $('input[name="qtc_450"][value="' + Pacientes[0].qtc_450 + '"]').prop('checked', true)						 
+                         $('input[name="sepsis"][value="' + Pacientes[0].sepsis + '"]').prop('checked', true)
+                         $('input[name="medQT"][value="' + Pacientes[0].medQT + '"]').prop('checked', true)
+                         $('input[name="medsQT"][value="' + Pacientes[0].medsQT + '"]').prop('checked', true)
+
+                         $('#observaciones').val(Pacientes[0].observaciones);
+
+                        // Actualiza el riesgo y muestra en pantalla
+                        var obj = actualizaRiesgo();
+                        if (obj.state == false) {
+                            $('#riesgolabel').text(mensaje(false, 0, ""));
+                        } else {
+                            $('#riesgolabel').text(mensaje(true, obj.value, obj.name+"."));
+                        }
+
+                        // Muestra en pantalla los valores qtc manual y ppm
+                        $('#qtc_man').val(qtc_man);
+
+                        // Muestra en pantalla datos de las medidas adoptadas
+                         $('input[name="m1"][value="' + Pacientes[0].m1 + '"]').prop('checked', true)
+                         $('input[name="m2"][value="' + Pacientes[0].m2 + '"]').prop('checked', true)
+                         $('input[name="m3"][value="' + Pacientes[0].m3 + '"]').prop('checked', true)
+                         $('input[name="m4"][value="' + Pacientes[0].m4 + '"]').prop('checked', true)
+                         $('input[name="m5"][value="' + Pacientes[0].m5 + '"]').prop('checked', true)
+                    }
+                );
+                if (qtc>0){
+                    $.getJSON("/ecgbase64?id=" + id,
+                        function(data) {
+                            base64result = data.image;
+                            $("#foto").attr("src", "data:image/jpg;base64," + base64result);
+                            var img = $("#foto");
+                            $("<img>").attr("src", $(img).attr("src")).load(function() {
+                                real_anchura = this.width;
+                                real_altura = this.height;
+                                img_anchura = $('#foto').width();
+                                img_altura = $('#foto').height();
+                                var i = $('#foto').imgAreaSelect({ instance: true });
+                                xo1 = parseFloat(fullimageclipping[0]) / (real_anchura/img_anchura);
+                                yo1 = parseFloat(fullimageclipping[1]) / (real_altura/img_altura);
+                                xo2 = parseFloat(fullimageclipping[2]) / (real_anchura/img_anchura);
+                                yo2 = parseFloat(fullimageclipping[3]) / (real_altura/img_altura);
+                                if ((xo1+xo2+yo1+yo2) == 0){
+                                    xo2 = img_anchura;
+                                    yo2=img_altura;
+                                }
+                                altura = Math.abs(xo1-xo2)
+                                anchura = Math.abs(yo1-yo2)
+                                x1 = xo1; y1 = yo1;
+                                x2 = xo2; y2 = yo2;
+                                x1_c = x1; y1_c = y1;
+                                x2_c = x2; y2_c = y2;
+                                showSelected();
+                            });
+                    });
+                }
+            }
+        );
+
+
+        var data = JSON.parse(localStorage.getItem('languages'));
+            language = data;
+            $('#project_title').text(data.project_title);
+            $('#h1_ecg').text(data.h1_ecg);
+            $('#h2_ecg').text(data.h2_ecg);
+            $('#ecg').text(data.ecg);
+            $('#ecg_done').text(data.ecg_done);
+            $('#patients').text(data.patients);
+            $('#logout').text(data.logout);
+            $('#ecg_pop').text(data.ecg);
+            $('#ecg_done_pop').text(data.ecg_done);
+            $('#patients_pop').text(data.patients);
+            $('#logout_pop').text(data.logout);
+            $('#page_back').text(data.return);
+            $('#estimate').val(data.estimate);
+            $('#factors').text(data.factors);
+            $('#tag_yes').text(data.tag_yes);
+            $('#tag_no').text(data.tag_no);
+            $('#tag_no_1').text(data.tag_no);
+            $('#tag_yes_1').text(data.tag_yes);
+            $('#factor1').text(data.factor1);
+            $('#factor2').text(data.factor2);
+            $('#factor3').text(data.factor3);
+            $('#factor4').text(data.factor4);
+            $('#factor5').text(data.factor5);
+			$('#factor10').text(data.factor10);
+            $('#factors_legend').text(data.factors_legend);
+            $('#riesgolabel').text(data.risk_label);
+            $('#page').text(data.page);
+            $('#next').text(data.next);
+            $('#prev').text(data.prev);
+            $('#prep').text(data.prep);
+			$('#remarks').text(data.remarks);
+			$('#actions').text(data.actions);
+			$('#basal_tx').text(data.basal_tx);
+			$('#upfile1').text(data.upfile1);
+			$('#deletefile1').text(data.deletefile1);
+			$('#clipped').text(data.clipped);
+			$('#action1').text(data.action1);
+			$('#action2').text(data.action2);
+			$('#action3').text(data.action3);
+			$("#qtc_man").attr("placeholder", data.qtc_man);
+			$("#observaciones").attr("placeholder", data.remarks);
+			$('#actualizaecg').val(data.actualizaecg);
+    });
+
+     </script>
+    <header id="masthead">
+        <div class="contnr">
+            <div class="project-title">
+                <h2 id="project_title"></h2>
+            </div>
+            <div class="back_cntnr"><a href="#" onclick="gotoHistorial();return false;" id="page_back"></a></div>
+            <h1 id="h1_ecg"></h1>
+            <div class="mob_menu_cntnr">
+                <a class="mob_menu_btn"></a>
+            </div>
+            <div id="desk_menu_cntnr">
+                <ul>
+                    <li><a href="/ecg" class="ecg" id="ecg"></a></li>
+                    <li><a href="/historial" class="ecg_done" id="ecg_done"></a></li>
+                    <li><a href="/administracion" class="patients" id="patients"></a></li>
+                    <li><a href="/logout_check" class="logout" id="logout"></a></li>
+                </ul>
+            </div>
+
+            <div id="menu_pop">
+                <div id="menu_pop_hdr">
+                    <div class="contnr">
+                        <a href="#">X</a>
+                        <span>Menu</span>
+                    </div>
+
+                </div>
+                <div id="menu_pop_bd">
+                    <div class="contnr">
+                        <ul>
+                            <li><a href="/ecg" class="ecg"></a></li>
+                            <li><a href="/historial" class="ecg_done" id="ecg_done_pop"></a></li>
+                            <li><a href="/administracion" class="patients" id="patients_pop"></a></li>
+                            <li><a href="/logout_check" class="logout" id="logout_pop"></a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </header>
+    <section id="mastsect">
+        <div class="contnr">
+            <h2 id="h2_ecg"></h2>
+
+            <div class="formulario">
+                <div class="input-contenedor">
+                    <label class="riesgo" id="riesgolabel"></label>
+                </div>
+
+                <div id="tabs">
+                    <ul>
+                        <li><a href="#tabs-1" onclick="showSelected();"><text id="factors"></text></a></li>
+                        <li><a href="#tabs-2" onclick="showSelected();"><text id="actions"></text></a></li>
+                        <li><a href="#tabs-3" onclick="showSelected();"><text id="remarks"></text></a></li>
+                    </ul>
+                    <div id="tabs-1">
+                        <div class="input-contenedor">
+                            <div id="contexto">
+                            <table>
+                                <tr>
+                                    <td><text id="tag_no"></text></td>
+                                    <td><text id="tag_yes"></text></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="radio" name="diuretico" value="0"></td>
+                                    <td><input type="radio" name="diuretico" value="1"></td>
+                                    <td><text id="factor1"></text></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="radio" name="suero" value="0"></td>
+                                    <td><input type="radio" name="suero" value="1"></td>
+                                    <td><text id="factor2"></text></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="radio" name="qtc_450" value="0"></td>
+                                    <td><input type="radio" name="qtc_450" value="1"></td>
+                                    <td><text id="factor10"></text></td>
+                                </tr>								
+                                <tr>
+                                    <td><input type="radio" name="sepsis" value="0"></td>
+                                    <td><input type="radio" name="sepsis" value="1"></td>
+                                    <td><text id="factor3"></text></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="radio" name="medQT" value="0"></td>
+                                    <td><input type="radio" name="medQT" value="1"></td>
+                                    <td><text id="factor4"></text></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="radio" name="medsQT" value="0"></td>
+                                    <td><input type="radio" name="medsQT" value="1"></td>
+                                    <td><text id="factor5"></text></td>
+                                </tr>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tabs-2">
+                        <div class="input-contenedor">
+                            <table>
+                                <tr>
+                                    <td><text id="tag_no_1"></text></td>
+                                    <td><text id="tag_yes_1"></text></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="radio" name="m1" value="0"/></td>
+                                    <td><input type="radio" name="m1" value="1"/></td>
+                                    <td><text id="action1"></text></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="radio" name="m2" value="0"/></td>
+                                    <td><input type="radio" name="m2" value="1"/></td>
+                                    <td><text id="action2"></text></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="radio" name="m3" value="0"/></td>
+                                    <td><input type="radio" name="m3" value="1"/></td>
+                                    <td><text id="action3"></text></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="tabs-3">
+                        <div class="input-contenedor">
+                            <table>
+                                <tr>
+                                    <td><textarea name="observaciones" id="observaciones" cols="50" rows="7"></textarea></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="input-contenedor">
+                    <div id="basal-contenedor">
+                        <input type="checkbox" name="basal" id="basal"/><text id ="basal_tx"></text>
+                    </div>
+                    <img class="icon" src="static/icons/heartbeat-solid.svg"/>
+                    <input type="radio" name="qtc_type" id="qtc_type_0" value="0" checked="checked">
+                    <button id="upfile1"><text id ="upfile1"></text></button>
+                    <button id="deletefile1"><text id ="deletefile1"></text></button>
+                    <button id="clipped"><text id ="clipped"></text></button>
+                    <input type="file" name="upload" id="imgInp" style="display:none" placeholder="ECG">
+                    <div id="imgInp_name"></div>
+                    <div>
+                        <img class="icon" src="static/icons/id-card-regular.svg"/>
+                        <input type="radio" name="qtc_type" id="qtc_type_1" value="1">
+                        QTc (ms): <input type="text" name="qtc_man" id="qtc_man" maxlength="6" placeholder="Introduce valor, en caso de estar disponible">
+                    </div>
+                </div>
+
+                <div id="detalle"></div>
+                <div id="pdf">
+                    <div id="fotodiv"><img id="foto" src="#" alt="" width="100%"></div>
+                </div>
+
+                <input type="button" value="Actualiza y regresa a historial" id="actualizaecg" class="button" onclick="ecgupdate()" />
+
+            </div>
+        </div>
+    </section>
+
+
+    <script type="text/javascript">
+        var medidas_last_id;
+        var x1=0, y1=0, x2=0, y2=0;
+        var xo1, yo1, xo2, yo2;
+        var anchura=0, altura=0, real_altura=0, real_anchura=0, img_altura, img_anchura;
+
+        $("#upfile1").click(function () {
+            $("#imgInp").trigger('click');
+        });
+
+        $("#deletefile1").click(function () {
+            $('#foto').imgAreaSelect({
+                hide: true
+            });
+            $('#pdf').hide();
+            base64result = undefined;
+            qtc = 0;
+            newImage = 1;
+        });
+
+        $("#clipped").click(function () {
+            var i = $('#foto').imgAreaSelect({ instance: true });
+            if ((anchura==0) && (altura==0)){
+                x1 = 0;         y1 = 0;
+                x2 = i.width(); y2 = i.height();
+            }
+            else {
+                x1= xo1; y1= yo1;
+                x2= xo2; y2= yo2;
+            }
+           i.setSelection(xo1, yo1, xo2-1, yo2-1, true);
+           i.setOptions({ show: true });
+           i.update();
+        });
+
+
+        function gotoHistorial(){
+                window.location.replace("historial?dni="+ Pacientes[0].dni);
+        }
+
+        function base642Binary(base64) {
+            var raw = window.atob(base64);
+            var rawLength = raw.length;
+            var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+            for (var i = 0; i < rawLength; i++) {
+                array[i] = raw.charCodeAt(i);
+            }
+            return array;
+        }
+
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                reader.onload = function(e) {
+                    filename = input.files[0].name;
+                    $('#foto').attr('src', e.target.result);
+                    var img = $("#foto");
+                    $("<img>").attr("src", $(img).attr("src")).load(function() {
+                        real_anchura = this.width;
+                        real_altura = this.height;
+                        img_anchura = $('#foto').width();
+                        img_altura = $('#foto').height();
+                       // console.log("Original width=" + real_anchura + ", " + "Original height=" + real_altura);
+                       // console.log("Screen width=" + img_anchura + ", " + "Screen height=" + img_altura);
+                        newImage =1;
+                        base64result = reader.result.split(',')[1];
+                    });
+                }
+
+                reader.readAsDataURL(input.files[0]); // convert to base64 string
+            }
+        }
+
+        var ias2 = $('#foto').imgAreaSelect({
+            handles: false,
+            onSelectEnd: function(img, selection) {
+                x1 = selection.x1;
+                y1 = selection.y1;
+                x2 = selection.x2;
+                y2 = selection.y2;
+                anchura = selection.width;
+                altura = selection.height;
+            }
+        });
+
+
+        $("#imgInp").change(function() {
+           // Elimina el area seleccionada al cambiar de foto
+           var i=$("#foto").imgAreaSelect({ instance: true });
+           i.setOptions({ hide: true });
+           i.update(); altura=0; anchura=0;
+           //
+           if ($(this).get(0).files[0]!=null){
+            $('#foto').imgAreaSelect({
+                hide: false
+            });
+            var name = $(this).get(0).files[0].name;
+            $('#paciente').empty();
+            if ($(this).get(0).files[0] == null) {
+                $('#foto').attr('src', null);
+            } else {
+                if (name.endsWith('.png') | name.endsWith('.jpg')){
+                    $('#pdf').show();
+                    readURL(this);
+                }
+                else {
+                    $('#pdf').hide();
+                    $("#imgInp").val(null);
+                    setTimeout(function() {
+                        $("#error").hide();
+                    }, 2000);
+                }
+            }
+           }
+        });
+
+
+        var getObjectByValue = function(array, key, value) {
+            return array.filter(function(object) {
+                return object[key] === value;
+            });
+        };
+
+        function getQtc_type(basal_checked, checked){
+            type = 0;
+            qtc_man = $("#qtc_man").val();
+            if (basal_checked) {
+    		    type = 80 + checked;
+                if (((base64result  == undefined) && (type == 80)) || ((qtc_man <= 0) && (type == 81)))
+					    type = -1;
+			}
+			else {
+                if ((base64result != undefined) && (qtc_man > 0)) {
+                    type = 2;
+                } else if ((base64result == undefined) && (qtc_man > 0)) {
+                    type = 1;
+                } else if ((base64result != undefined) && (qtc_man <= 0)) {
+                    type = 0;
+                } else {
+                    type = -1;
+                }
+	        }
+
+            return type;
+        }
+
+
+        function ecgupdate() {
+           $('#detalle').html("<p id='error-computing'>"+ language.computing +"<span id='wait'>.</span></p>");
+            window.dotsGoingUp = true;
+            var dots = window.setInterval(function() {
+                var wait = document.getElementById("wait");
+                if (window.dotsGoingUp)
+                    wait.innerHTML += ".";
+                else {
+                    wait.innerHTML = wait.innerHTML.substring(1, wait.innerHTML.length);
+                    if (wait.innerHTML === "")
+                        window.dotsGoingUp = true;
+                    }
+                    if (wait.innerHTML.length > 9)
+                        window.dotsGoingUp = false;
+            }, 100);
+
+           var obj = actualizaRiesgo();
+           var qtc_man = parseFloat($("#qtc_man").val());
+           if (isNaN(qtc_man)) qtc_man=0;
+           var checked = parseInt($("input:radio[name='qtc_type']:checked").val());
+           var basal_checked = $('#basal').is(":checked");
+           new_qtc_type = getQtc_type(basal_checked,checked);
+           if (new_qtc_type < 0){
+                $('#detalle').html("<p id='error'>Debe adquirir imagen o asignar valor a QTC</p>");
+                setTimeout(function() {
+                  $("#error").hide();
+                }, 2000);
+                window.clearInterval(dots);
+           }
+           else {
+                newClipped = 1;
+                if (x1_c==x1 && y1_c==y1 && x2_c==x2 && y2_c==y2) newClipped=0;
+
+                if (altura < 6 || anchura < 6) {
+                    altura = real_altura;
+                    anchura = real_anchura;
+                    x1 = 0;
+                    y1 = 0;
+                    x2 = anchura;
+                    y2 = altura;
+                } else {
+                    altura = altura * (real_altura/img_altura);
+                    anchura = anchura * (real_anchura/img_anchura);
+                    x1 = x1 * (real_anchura/img_anchura);
+                    y1 = y1 * (real_altura/img_altura);
+                    x2 = x2 * (real_anchura/img_anchura);
+                    y2 = y2 * (real_altura/img_altura);
+                }
+                if (base64result == undefined){
+                    base64result = '';
+                    x1 = 0; x2 = 0;
+                    x2 = 0; y2 = 0;
+                    filename = 'void';
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/ecgupdate',
+                    data: {
+                        'x1': x1,
+                        'y1': y1,
+                        'x2': x2,
+                        'y2': y2,
+                        'id': id,
+                        'dni': Pacientes[0].dni,
+                        'fecnac': Pacientes[0].fecnac,
+                        'sexo': Pacientes[0].sexo,
+                        'qtc_type': new_qtc_type,
+                        'newImage': newImage,
+                        'newClipped': newClipped,
+                        'content': base64result,
+                        'qtc_man' : qtc_man,
+                        'contexto': obj.value,
+                        'diuretico': $("input[name='diuretico']:checked").val(),
+                        'suero': $("input[name='suero']:checked").val(),
+                        'qtc_450': $("input[name='qtc_450']:checked").val(),						
+                        'sepsis': $("input[name='sepsis']:checked").val(),
+                        'medQT': $("input[name='medQT']:checked").val(),
+                        'medsQT': $("input[name='medsQT']:checked").val(),
+                        'm1': $("input[name='m1']:checked").val(),
+                        'm2': $("input[name='m2']:checked").val(),
+                        'm3': $("input[name='m3']:checked").val(),
+                        'm4': 0,
+                        'm5': 0,
+                        'observaciones': $('#observaciones').val()
+                    },
+                    success: function(data) {
+                        window.clearInterval(dots);
+                        window.location.replace("historial?dni="+Pacientes[0].dni);
+                        }
+                });
+            }
+        }
+
+
+        function round(value, decimals) {
+            return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+        }
+
+
+        function mensaje(state, valor, name) {
+            var msg = [language.risk_undefined, language.risk_low, language.risk_average, language.risk_high];
+            var riesgo_str = language.risk_string;
+            var idx = 0;
+            if (state == false) {
+                idx = 0;
+            } else {
+                idx = 2;
+                if (valor <= 1.58) idx = 1;
+                if (valor >= 2.39) idx = 3;
+            }
+            var mensaje = riesgo_str + name + " " + msg[idx] + " " + round(valor, 2);
+            return mensaje;
+        }
+
+
+        // Comprueba si es basal para ese paciente
+        $('#basal').change(function() {
+           var status = $('#basal').is(":checked");
+           if (status==true){
+              $("#qtc_type_0").show();
+              $("#qtc_type_1").show();
+              show_qtc_type = 1;
+           }
+           else{
+              $("#qtc_type_0").hide();
+              $("#qtc_type_1").hide();
+              show_qtc_type = 0;
+           }
+        });
+
+
+        $('#contexto input').change(function() {
+            var obj = actualizaRiesgo();
+            if (obj.state == false) {
+                $('#riesgolabel').text(mensaje(false, 0, ""));
+            } else {
+                $('#riesgolabel').text(mensaje(true, obj.value, obj.name+"."));
+            }
+        });
+
+
+        function actualizaRiesgo() {
+            var dni_valor = Pacientes[0].dni;
+            res = getObjectByValue(Pacientes, "dni", dni_valor)[0];
+            var state = false;
+            var sumapuntos = null;
+            if (res != null) {
+                state = true;
+                var nombre_paciente = res.apellidos+', '+res.nombre;
+                var fecnac = res.fecnac;
+                var sexo = res.sexo;
+                var iam = res.iam;
+                var cardiaco = res.cardiaco;
+                var e = calculaEdad(fecnac);
+                var edad = parseInt((e >= 68) ? 1 : 0);
+                var sexo = parseInt(sexo);
+                var diuretico = parseInt($("input[name='diuretico']:checked").val());
+                var suero = parseInt($("input[name='suero']:checked").val());
+                var qtc_450 = parseInt($("input[name='qtc_450']:checked").val());				
+                var sepsis = parseInt($("input[name='sepsis']:checked").val());
+                var medQT = parseInt($("input[name='medQT']:checked").val());
+                var medsQT = parseInt($("input[name='medsQT']:checked").val());
+                var coef = 5/21;
+                sumapuntos = edad * coef + sexo * coef + diuretico * coef + suero * coef * 2 + qtc_450 * coef * 2 + iam * coef * 2 + sepsis * coef * 3 + medQT * coef * 3 + medsQT * coef * 3 + cardiaco * coef * 3;
+				sumapuntos = round(sumapuntos,2);
+				contexto_valor = sumapuntos;
+            }
+            return {
+                state: state,
+                value: sumapuntos,
+                name: nombre_paciente
+            };
+        }
+
+
+        function resetContexto() {
+            $('#riesgolabel').text(mensaje(false, 0, ""));
+            $('input:radio[name=diuretico]').filter('[value=0]').prop('checked', true);
+            $('input:radio[name=suero]').filter('[value=0]').prop('checked', true);
+            $('input:radio[name=qtc_450]').filter('[value=0]').prop('checked', true);			
+            $('input:radio[name=sepsis]').filter('[value=0]').prop('checked', true);
+        }
+
+        function calculaEdad(fecnac) {
+            var sdt = new Date(fecnac);
+            var difdt = new Date(new Date() - sdt);
+            var edad = (difdt.toISOString().slice(0, 4) - 1970);
+            return edad;
+        }
+
+
+        function showSelected() {
+            setTimeout(function(){
+                var i = $('#foto').imgAreaSelect({ instance: true });
+                i.setSelection(x1, y1, x2-1, y2-1, true);
+                i.setOptions({ show: true });
+                i.update();
+            }, 1);
+        }
+    </script>
+</body>
+
+</html>

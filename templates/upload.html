@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>Analisis ECG</title>
+	<meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="/static/css/estilos.css">
+
+
+</head>
+<body>
+<h1>ANÁLISIS DE SEÑALES ECG</h1>
+
+    <div class="formulario">
+		<div>
+			<h2>Nivel de riesgo: {{alarma}}  <img src="/static/images/{{icon}}.png" width="5%" /></h2>
+			<h2>QTc: {{qtc}} <img src="/static/images/qtc.png" width="100%" /></h2>
+		</div>
+    	<p>¿Deseas regresar a Menu? <a class="link" href="/menu">Enlace a Menu</a></p>
+	</div>
+
+    <div class="formulario">
+		<div>
+			<h2>{{paciente}}</h2>
+			<table id="pacientes">
+				{% if paciente!="No existe" %}
+				<tr>
+					<th>Fecha</th>
+    				<th colspan="2">Nivel riesgo</th>
+					<th>QTc</th>
+    				<th>ECG</th>
+  				</tr>
+				{% endif %}
+ 				{% for item in lista %}
+					<tr>
+						<td>{{item.time}}</td>
+						<td>{{item.alarma}}</td><td align="center"><img src="/static/images/{{item.icon}}.png" width="15%"/></td>
+						<td>{{item.qtc}}</td>
+						<td><a href="static/files/{{dni}}/{{item.url}}"><i class="fas fa-heartbeat icon"></i></a></td>
+					</tr>
+ 				{% endfor %}
+			</table>
+ 		</div>
+	</div>
+
+</body>
+</html>

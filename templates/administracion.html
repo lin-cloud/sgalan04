@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Patients</title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <script src="/static/lib/jquery-1.12.4.js"></script>
+    <script src="/static/lib/jquery-ui.js"></script>
+    <script src="/static/lib/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/estilos.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+</head>
+
+<body>
+
+    <script type="text/javascript">
+    $( document ).ready(function() {
+        var data = JSON.parse(localStorage.getItem('languages'));
+            $('#project_title').text(data.project_title);
+            $('#h1_patients').text(data.h1_patients);
+            $('#h2_patients').text(data.h2_patients);
+            $('#return').text(data.return);
+            $('#ecg').text(data.ecg);
+            $('#ecg_done').text(data.ecg_done);
+            $('#patients').text(data.patients);
+            $('#logout').text(data.logout);
+            $('#ecg_pop').text(data.ecg);
+            $('#ecg_done_pop').text(data.ecg_done);
+            $('#patients_pop').text(data.patients);
+            $('#logout_pop').text(data.logout);
+            $('#save').val(data.save);
+            $("#dni").attr("placeholder", data.dni);
+            $("#nombre").attr("placeholder", data.name);
+            $("#apellidos").attr("placeholder", data.surname);
+            $("#birthday").text(data.birthday);
+            $("#sex").text(data.sex);
+            $("#male").text(data.male);
+            $("#female").text(data.female);
+            $("#iam_label").text(data.iam_label);
+            $("#cardiac_label").text(data.cardiac_label);
+            $("#observaciones").attr("placeholder", data.remarks);
+            $('#tag_yes').text(data.tag_yes);
+            $('#tag_no').text(data.tag_no);
+            $('#tag_yes_1').text(data.tag_yes);
+            $('#tag_no_1').text(data.tag_no);
+    });
+
+
+        $(document).ready(function() {
+            $("#dni").on("change keyup paste copy", function() {
+                $.getJSON("/registro?dni=" + $(this).val(),
+                    function(data) {
+                        if (data.length > 0) {
+                            $.each(data, function(k, t) {
+                                $('#nombre').val(t.nombre);
+                                $('#apellidos').val(t.apellidos);
+                                $('#fecnac').val(t.fecnac);
+                                $('#sexo').val(t.sexo);
+                                if (t.iam == 0)
+                                    $('input:radio[name="iam"][value="0"]').prop('checked', true);
+                                else
+                                    $('input:radio[name="iam"][value="1"]').prop('checked', true);
+                                if (t.cardiaco == 0)
+                                    $('input:radio[name="cardiaco"][value="0"]').prop('checked', true);
+                                else
+                                    $('input:radio[name="cardiaco"][value="1"]').prop('checked', true);
+                                $('#observaciones').val(t.observaciones);
+                            });
+                        } else {
+                            $('#nombre').val('');
+                            $('#apellidos').val('');
+                            $('#fecnac').val('');
+                            $('#sexo').val('');
+                            $('#observaciones').val('');
+                            $('input:radio[name="iam"][value="0"]').prop('checked', true);
+                            $('input:radio[name="cardiaco"][value="0"]').prop('checked', true);
+                        }
+                    });
+            });
+        });
+
+        function calculaEdad(fecnac) {
+            var sdt = new Date(fecnac);
+            var difdt = new Date(new Date() - sdt);
+            var edad = (difdt.toISOString().slice(0, 4) - 1970);
+            return edad;
+        }
+
+
+        function validaDni(dni) {
+            if (dni == '') {
+                return false;
+            } else return true;
+        }
+
+
+        function updatePaciente() {
+            if (validaDni($('#dni').val()) == false) {
+                $('#detalle').html("<p id='error'>Identificador no es válido!</p>");
+                setTimeout(function() {
+                    $("#error").hide();
+                }, 2000);
+            } else {
+                if ((isNaN($('#fecnac').val()) == false) || ($('#sexo').val() == null)) {
+                    $('#detalle').html("<p id='error'>No se ha grabado: faltan datos por determinar!</p>");
+                    setTimeout(function() {
+                        $("#error").hide();
+                    }, 2000)
+                } else {
+                    var form_data = new FormData();
+                    form_data.append('dni', $('#dni').val());
+                    form_data.append('nombre', $('#nombre').val());
+                    form_data.append('apellidos', $('#apellidos').val());
+                    form_data.append('fecnac', $('#fecnac').val());
+                    form_data.append('sexo', $('#sexo').val());
+                    form_data.append('iam', $("input[name='iam']:checked").val());
+                    form_data.append('cardiaco', $("input[name='cardiaco']:checked").val());
+                    form_data.append('observaciones', $('#observaciones').val());
+                    $(function() {
+                        $.ajax({
+                            type: 'POST',
+                            url: '/updatepaciente',
+                            data: form_data,
+                            contentType: false,
+                            cache: false,
+                            processData: false,
+                            success: function(data) {
+                                $('#detalle').html("<p id='error'>Datos actualizados del paciente!</p>");
+                                setTimeout(function() {
+                                    $("#error").hide();
+                                }, 2000);
+                                // Incorpora el nuevo dni
+                                $.getJSON("/dni",
+                                    function(data) {
+                                        var nombres = new Array();
+                                        $.each(data, function(k, t) {
+                                            nombres[k] = t.dni;
+                                        });
+                                        $("#dni").autocomplete({
+                                            source: nombres
+                                        });
+                                    });
+                            },
+                        })
+                    });
+                }
+            }
+        }
+
+
+
+        $.getJSON("/dni",
+            function(data) {
+                var nombres = new Array();
+                $.each(data, function(k, t) {
+                    nombres[k] = t.dni;
+                });
+                $("#dni").autocomplete({
+                    source: nombres
+                });
+            });
+    </script>
+
+    <header id="masthead">
+        <div class="contnr">
+            <div class="project-title">
+                <h2 id="project_title"></h2>
+            </div>
+            <div class="back_cntnr"><a href="/" id="return">volver</a></div>
+            <div class="mob_menu_cntnr">
+                <a class="mob_menu_btn"></a>
+            </div>
+            <div id="desk_menu_cntnr">
+                <ul>
+                    <li><a href="/ecg" class="ecg" id="ecg"></a></li>
+                    <li><a href="/historial" class="ecg_done" id="ecg_done"></a></li>
+                    <li><a href="/administracion" class="patients" id="patients"></a></li>
+                    <li><a href="/logout_check" class="logout" id="logout"></a></li>
+                </ul>
+            </div>
+
+            <div id="menu_pop">
+                <div id="menu_pop_hdr">
+                    <div class="contnr">
+                        <a href="#">X</a>
+                        <span>Menu</span>
+                    </div>
+
+                </div>
+                <div id="menu_pop_bd">
+                    <div class="contnr">
+                        <ul>
+                            <li><a href="/ecg" class="ecg" id="ecg_pop">ECG</a></li>
+                            <li><a href="/historial" class="ecg_done" id="ecg_done_pop"></a></li>
+                            <li><a href="/administracion" class="patients" id="patients_pop"></a></li>
+                            <li><a href="/logout_check" class="logout" id="logout_pop"></a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </header>
+    <section id="mastsect">
+        <div class="contnr">
+            <div class="formulario">
+                <div class="contenedor">
+                    <h2 id="h2_patients"></h2>
+                    <div class="input-contenedor">
+                        <img class="icon" src="static/icons/id-card-regular.svg"/>
+                        <input type="text" name="dni" id="dni" placeholder="Identificador" maxlength="30">
+                    </div>
+
+                    <div class="input-contenedor">
+                        <img class="icon" src="static/icons/user-solid.svg"/>
+                        <input type="text" name="nombre" id="nombre" placeholder="Nombre" maxlength="20">
+                    </div>
+
+                    <div class="input-contenedor">
+                        <img class="icon" src="static/icons/user-solid.svg"/>
+                        <input type="text" name="apellidos" id="apellidos" placeholder="Apellidos" maxlength="30">
+                    </div>
+
+                    <div class="input-contenedor">
+                        <img class="icon" src="static/icons/user-regular.svg"/>
+                        <label id="birthday">Fecha de nacimiento </label>
+                        <input type="date" name="fecnac" id="fecnac" placeholder="Fecha nacimiento" maxlength="10" min="1900-01-01" max="2040-12-31" required pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">
+                        <span class="validity"></span>
+
+                    </div>
+
+                    <div class="input-contenedor">
+                        <img class="icon" src="static/icons/user-regular.svg"/>
+                        <label for="sexo" id="sex">Sexo</label>
+                        <select class="select-css" name="sexo" id="sexo" required>
+							<option value="" selected disabled></option>
+							<option value='0' id="male">Hombre</option>
+							<option value='1' id="female">Mujer</option>
+						</select>
+                        <span class="validity"></span>
+
+                    </div>
+
+                    <div class="input-contenedor">
+                        <img class="icon" src="static/icons/hospital-regular.svg"/>
+                        <table border="0" class="selectors" style="display: inline;">
+                            <tr>
+                                <td>
+                                    <input type="radio" name="iam" value="0" checked="checked">
+                                </td>
+                                <td><input type="radio" name="iam" value="1"></td>
+                                <td><label id="iam_label">IAM (Infarto Agudo de miocardio)</label></td>
+                            </tr>
+                            <tr>
+                                <td><text id="tag_no"></text></td>
+                                <td><text id="tag_yes"></text></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="input-contenedor">
+                        <img class="icon" src="static/icons/hospital-regular.svg"/>
+                        <table border="0" class="selectors" style="display: inline;">
+                            <tr>
+                                <td>
+                                    <input type="radio" name="cardiaco" value="0" checked="checked">
+                                </td>
+                                <td><input type="radio" name="cardiaco" value="1"></td>
+                                <td><label id="cardiac_label">Insuficiencia cardíaca</label></td>
+                            </tr>
+                            <tr>
+                                <td><text id="tag_no_1"></text></td>
+                                <td><text id="tag_yes_1"></text></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="input-contenedor">
+                        <img class="icon" src="static/icons/hospital-regular.svg"/>
+                        <textarea name="observaciones" id="observaciones" placeholder="Observaciones" cols="30" rows="2" ></textarea></td>
+                    </div>
+
+                    <input type="button" id="save" value="Guardar" class="button" onclick="updatePaciente()">
+
+                </div>
+                <div id="detalle"></div>
+
+            </div>
+        </div>
+    </section>
+
+
+
+</body>
+
+</html>

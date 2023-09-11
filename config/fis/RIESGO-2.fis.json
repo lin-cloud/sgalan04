@@ -1,0 +1,63 @@
+{
+   "fis":{
+      "name":"RIESGO-2",
+      "type":"mamdani",
+      "umInputs":"2",
+      "numOutputs":"1",
+      "andMethod":"min",
+      "orMethod":"max",
+      "defuzzMethod":"mom",
+      "impMethod":"min",
+      "aggMethod":"max",
+      "input":{
+         "name":[
+            "QTc",
+            "CONTEXTO"
+         ],
+         "range":[
+            [350, 550],
+            [0, 5]
+         ],
+         "mf":[
+            {
+               "name":["BAJO-NORMAL", "MOD-ALTO", "ALTO-M-ALTO"],
+               "type":["trapmf", "trapmf", "trapmf"],
+               "params":[
+                  [350, 350, 450, 465],
+                  [450, 465, 465, 480],
+                  [465, 480, 550, 550]
+               ]
+            },
+            {
+               "name":["BAJO", "MEDIO", "ALTO"],
+               "type":["trapmf", "trimf", "trapmf"],
+               "params":[
+                  [0, 0, 1.2, 1.98],
+                  [1.2, 1.98, 2.8],
+                  [1.98, 2.8, 5, 5]
+               ]
+            }
+         ]
+      },
+      "output":{
+         "name":"R-ARRITMIA",
+         "range":[0, 1],
+         "mf":{
+            "name":["VERDE", "NARANJA", "ROJO"],
+            "type":["trimf", "trimf", "trimf"],
+            "params":[
+               [0, 0, 0.5],
+               [0, 0.5, 1],
+               [0.5, 1, 1]
+            ]
+         }
+      },
+      "rule":[
+               [1,  1, 1, 1, 1],
+               [1,  2, 2, 1, 1],
+               [2, -3, 2, 1, 1],
+               [3,  0, 3, 1, 1],
+               [0,  3, 3, 1, 1]
+      ]
+   }
+}

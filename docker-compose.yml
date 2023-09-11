@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+  db:
+    image: mysql:5.7
+    container_name: db
+    volumes:
+      - ./mysql-data/:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=Loncres2020
+      - MYSQL_DATABASE=hospital
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - 3306:3306      
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - PMA_HOST=db
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 8080:80
+
+  app:
+    shm_size: '1000000000'
+    build:
+      context: .
+    tty: true
+    container_name: app
+    restart: always
+
+  nginx:
+    build: ./nginx
+    container_name: servidor
+    restart: always
+    tty: true
+    links:
+      - app
+    ports:
+      - '80:80'

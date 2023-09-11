@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Logout</title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <script src="/static/lib/jquery-1.12.4.js"></script>
+    <script src="/static/lib/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/estilos.css">
+
+
+</head>
+
+<body>
+<script type="text/javascript">
+   $( document ).ready(function() {
+        var data = JSON.parse(localStorage.getItem('languages'));
+            $('#project_title').text(data.project_title);
+            $('#h1_logout').text(data.h1_logout);
+            $('#h2_logout').text(data.h2_logout);
+            $('#return').text(data.return);
+            $('#ecg').text(data.ecg);
+            $('#ecg_done').text(data.ecg_done);
+            $('#patients').text(data.patients);
+            $('#logout').text(data.logout);
+            $('#ecg_pop').text(data.ecg);
+            $('#ecg_done_pop').text(data.ecg_done);
+            $('#patients_pop').text(data.patients);
+            $('#logout_pop').text(data.logout);
+            $('#accept').text(data.accept);
+            $('#deny').text(data.deny);
+        });
+
+     </script>
+    <header id="masthead">
+        <div class="contnr">
+            <div class="project-title">
+                <h2 id="project_title"></h2>
+            </div>
+            <div class="back_cntnr"><a href="/" id="return"></a></div>
+            <div class="mob_menu_cntnr">
+                <a class="mob_menu_btn"></a>
+            </div>
+            <div id="desk_menu_cntnr">
+                <ul>
+                    <li><a href="/ecg" class="ecg" id="ecg"></a></li>
+                    <li><a href="/historial" class="ecg_done" id="ecg_done"></a></li>
+                    <li><a href="/administracion" class="patients" id="patients"></a></li>
+                    <li><a href="/logout_check" class="logout" id="logout"></a></li>
+                </ul>
+            </div>
+
+            <div id="menu_pop">
+                <div id="menu_pop_hdr">
+                    <div class="contnr">
+                        <a href="#">X</a>
+                        <span>Menu</span>
+                    </div>
+
+                </div>
+                <div id="menu_pop_bd">
+                    <div class="contnr">
+                        <ul>
+                            <li><a href="/ecg" class="ecg" id="ecg_pop"></a></li>
+                            <li><a href="/historial" class="ecg_done" id="ecg_done_pop"></a></li>
+                            <li><a href="/administracion" class="patients" id="patients_pop"></a></li>
+                            <li><a href="/logout_check" class="logout" id="logout_pop"></a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </header>
+    <section id="mastsect">
+        <div class="contnr">
+            <div class="formulario">
+                <h1>
+                    <i class="fas fa-exclamation-triangle icon"></i>
+                </h1>
+                <h2><p id="h2_logout"></p></h2>
+            </div>
+
+            <center>
+                <div>
+                    <a class="button" href="{{url_for('logout')}}" id="accept"></a>
+                    <a class="button" href="{{url_for('home')}}" id="deny"></a>
+                </div>
+            </center>
+        </div>
+    </section>
+
+
+</body>
+
+</html>

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ECG</title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0">
+    <script src="/static/lib/jquery-1.12.4.js"></script>
+    <script src="/static/lib/jquery-ui.js"></script>
+    <script src="/static/lib/common.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/estilos.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <script src="/static/lib/jquery.imgareaselect.js"></script>
+    <link rel="stylesheet" href="/static/css/imgareaselect-animated.css">
+    <script src="/static/lib/kendo.all.min.js"></script>
+    <link rel="stylesheet" href="/static/css/kendo.common-bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/css/kendo.bootstrap.min.css" />
+
+    <!-- Magnific Popup core CSS file -->
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+    <!-- Magnific Popup core JS file -->
+    <script src="/static/lib/jquery.magnific-popup.js"></script>
+
+</head>
+<body>
+    <script type="text/javascript">
+        var contexto_valor;
+        var language;
+        var show_qtc_type;
+        var factors_legend;
+
+    $( document ).ready(function() {
+        $("#qtc_type_0").hide();
+        $("#qtc_type_1").hide();
+        show_qtc_type = 0;
+        // Initializing popup
+        $('.image-link').magnificPopup({type:'image'});
+
+        var data = JSON.parse(localStorage.getItem('languages'));
+            language = data;
+            $('#project_title').text(data.project_title);
+            $('#h1_ecg').text(data.h1_ecg);
+            $('#h2_ecg').text(data.h2_ecg);
+            $('#ecg').text(data.ecg);
+            $('#ecg_done').text(data.ecg_done);
+            $('#patients').text(data.patients);
+            $('#logout').text(data.logout);
+            $('#ecg_pop').text(data.ecg);
+            $('#ecg_done_pop').text(data.ecg_done);
+            $('#patients_pop').text(data.patients);
+            $('#logout_pop').text(data.logout);
+            $('#page_back').text(data.return);
+            $('#estimate').val(data.estimate);
+            $("#dni").attr("placeholder", data.dni);
+            $('#factors').text(data.factors);
+            $('#tag_yes').text(data.tag_yes);
+            $('#tag_no').text(data.tag_no);
+            $('#factor1').text(data.factor1);
+            $('#factor2').text(data.factor2);
+            $('#factor3').text(data.factor3);
+            $('#factor4').text(data.factor4);
+            $('#factor5').text(data.factor5);
+			$('#factor10').text(data.factor10);
+            factors_legend = data.factors_legend;
+            $('#riesgolabel').text(data.risk_label);
+            $('#page').text(data.page);
+            $('#next').text(data.next);
+            $('#prev').text(data.prev);
+            $('#prep').text(data.prep);
+            $("#observaciones").attr("placeholder", data.remarks);
+			$('#basal_tx').text(data.basal_tx);
+			$('#upfile1').text(data.upfile1);
+			$('#deletefile1').text(data.deletefile1);
+			$("#qtc_man").attr("placeholder", data.qtc_man);
+    });
+
+     </script>
+    <header id="masthead">
+        <div class="contnr">
+            <div class="project-title">
+                <h2 id="project_title"></h2>
+            </div>
+            <div class="back_cntnr"><a href="/" id="page_back"></a></div>
+            <div class="mob_menu_cntnr">
+                <a class="mob_menu_btn"></a>
+            </div>
+            <div id="desk_menu_cntnr">
+                <ul>
+                    <li><a href="/ecg" class="ecg" id="ecg"></a></li>
+                    <li><a href="/historial" class="ecg_done" id="ecg_done"></a></li>
+                    <li><a href="/administracion" class="patients" id="patients"></a></li>
+                    <li><a href="/logout_check" class="logout" id="logout"></a></li>
+                </ul>
+            </div>
+
+            <div id="menu_pop">
+                <div id="menu_pop_hdr">
+                    <div class="contnr">
+                        <a href="#">X</a>
+                        <span>Menu</span>
+                    </div>
+
+                </div>
+                <div id="menu_pop_bd">
+                    <div class="contnr">
+                        <ul>
+                            <li><a href="/ecg" class="ecg"></a></li>
+                            <li><a href="/historial" class="ecg_done" id="ecg_done_pop"></a></li>
+                            <li><a href="/administracion" class="patients" id="patients_pop"></a></li>
+                            <li><a href="/logout_check" class="logout" id="logout_pop"></a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </header>
+    <section id="mastsect">
+        <div class="contnr">
+            <h2 id="h2_ecg"></h2>
+
+            <div class="formulario">
+                <div class="contenedor" id="menu1">
+                    <div id="entradas">
+                        <div class="input-contenedor">
+                            <img class="icon" src="static/icons/id-card-regular.svg"/>
+                            <input type="text" name="dni" id="dni" placeholder="Identificador" maxlength="30">
+                        </div>
+
+                        <div class="input-contenedor">
+                           <img class="icon" src="static/icons/user-md-solid.svg"/>
+                            <label class="riesgo" id="riesgolabel"></label>
+                            <ul id="panelbarcontexto" class="ra-well-overlay">
+                                <li class="k-state-active"> <text id="factors"></text>
+                                    <div id="contexto">
+                                        <table class="factors">
+                                            <tr>
+                                                <td><text id="tag_no"></text></td>
+                                                <td><text id="tag_yes"></text></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="radio" name="diuretico" value="0" checked="checked"></td>
+                                                <td><input type="radio" name="diuretico" value="1"></td>
+                                                <td><text id="factor1"></text></td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="radio" name="suero" value="0" checked="checked"></td>
+                                                <td><input type="radio" name="suero" value="1"></td>
+                                                <td><text id="factor2"></text></td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="radio" name="qtc_450" value="0" checked="checked"></td>
+                                                <td><input type="radio" name="qtc_450" value="1"></td>
+                                                <td><text id="factor10"></text></td>
+                                            </tr>											
+                                            <tr>
+                                                <td><input type="radio" name="sepsis" value="0" checked="checked"></td>
+                                                <td><input type="radio" name="sepsis" value="1"></td>
+                                                <td><text id="factor3"></text></td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="radio" name="medQT" value="0" checked="checked"></td>
+                                                <td><input type="radio" name="medQT" value="1"></td>
+                                                <td><text id="factor4"></text>&nbsp;<a href="static/images/tdp.png" class="test-popup-link"><img style="vertical-align:middle" src="static/images/info.png" width="20"/></a></td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="radio" name="medsQT" value="0" checked="checked"></td>
+                                                <td><input type="radio" name="medsQT" value="1"></td>
+                                                <td><text id="factor5"></text></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="input-contenedor">
+                            <div id="basal-contenedor">
+                                <input type="checkbox" name="basal" id="basal"/><text id ="basal_tx"></text>
+                            </div>
+                            <img class="icon" src="static/icons/heartbeat-solid.svg"/>
+                            <input type="radio" name="qtc_type" id="qtc_type_0" value="0" checked="checked">
+                            <button id="upfile1"><text id ="upfile1"></text></button>
+							<button id="deletefile1"><text id ="deletefile1"></text></button>
+                            <input type="file" name="upload" id="imgInp" style="display:none" placeholder="ECG">
+                            <div id="imgInp_name"></div>
+                            <div>
+                               <img class="icon" src="static/icons/id-card-regular.svg"/>
+                                <input type="radio" name="qtc_type" id="qtc_type_1" value="1">
+                                QTc (ms): <input type="text" name="qtc_man" id="qtc_man" maxlength="6" placeholder="Introduce valor, en caso de estar disponible">
+                            </div>
+                        </div>
+
+                        <input type="button" value="Calcula" id="estimate" class="button" onclick="uploadfile()" />
+
+
+                    </div>
+
+                    <div id="paciente"></div>
+                    <div id="detalle"></div>
+                    <div id="detalle2"></div>
+                </div>
+
+                <div id="pdf">
+                    <div id="fotodiv"><img id="foto" src="#" alt="" width="100%"></div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div id="img_viewer">
+        <div id="img_viewer_hdr"><a href="#">volver</a></div>
+        <div id="img_viewer_bod">
+            <div id="img_viewer_container"><img id="img_viewer_img" src="/static/files/blank.jpg " /></div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var x1=0, y1=0, x2=0, y2=0;
+        var anchura=0, altura=0, real_altura=0, real_anchura=0, img_altura, img_anchura;
+        var filename;
+        var reader = new FileReader();
+        var base64result;
+
+        var Pacientes = [];
+        var panelbar = new Array();
+        var medidas_last_id;
+
+        $("#upfile1").click(function () {
+            $("#imgInp").trigger('click');
+        });
+        $("#deletefile1").click(function () {
+            $('#foto').imgAreaSelect({
+                hide: true
+            });
+            $('#pdf').hide();
+            base64result = undefined;
+            qtc = 0;
+        });
+
+        $('.test-popup-link').magnificPopup({
+            type: 'image',
+            mainClass: 'mfp-with-zoom', // this class is for CSS animation below
+            zoom: {
+                enabled: true, // By default it's false, so don't forget to enable it
+                duration: 300, // duration of the effect, in milliseconds
+                easing: 'ease-in-out', // CSS transition easing function
+            }
+        });
+
+
+        var getObjectByValue = function(array, key, value) {
+            return array.filter(function(object) {
+                return object[key] === value;
+            });
+        };
+
+        var panelbar = $("#panelbarcontexto").kendoPanelBar();
+        var kendoPanelbar = panelbar.data().kendoPanelBar;
+
+        $.getJSON("/registro",
+            function(data) {
+                Pacientes = data;
+                var dni_array = new Array();
+                $.each(data, function(k, t) {
+                    dni_array[k] = t.dni;
+                });
+                $("#dni").autocomplete({
+                    source: dni_array
+                });
+            });
+
+        $('#pdf').hide();
+
+
+        var ias2 = $('#foto').imgAreaSelect({
+            handles: false,
+            onSelectEnd: function(img, selection) {
+                x1 = selection.x1;
+                y1 = selection.y1;
+                x2 = selection.x2;
+                y2 = selection.y2;
+                anchura = selection.width;
+                altura = selection.height;
+            }
+        });
+
+
+
+
+        function base642Binary(base64) {
+            var raw = window.atob(base64);
+            var rawLength = raw.length;
+            var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+            for (var i = 0; i < rawLength; i++) {
+                array[i] = raw.charCodeAt(i);
+            }
+            return array;
+        }
+
+        function readURL(input) { 
+            if (input.files && input.files[0]) {
+                reader.onload = function(e) {
+                    $('#detalle').empty();
+                    $('#paciente').empty();
+                    filename = input.files[0].name;
+                    $('#foto').attr('src', e.target.result);
+                    var img = $("#foto");
+                    $("<img>").attr("src", $(img).attr("src")).load(function() {
+                        real_anchura = this.width;
+                        real_altura = this.height;
+                        img_anchura = $('#foto').width();
+                        img_altura = $('#foto').height();
+                        //alert("Original width=" + real_anchura + ", " + "Original height=" + real_altura);
+                        //alert("Screen width=" + img_anchura + ", " + "Screen height=" + img_altura);
+                        base64result = reader.result.split(',')[1];
+                        var i = $('#foto').imgAreaSelect({ instance: true, enable: true });
+                    });
+                }
+
+                reader.readAsDataURL(input.files[0]); // convert to base64 string
+            }
+        }
+
+        $("#imgInp").change(function() { 
+            $('#foto').imgAreaSelect({
+                hide: false
+            });
+            $('#pdf').show();
+
+            if ($(this).get(0).files[0]!=null){
+                $('#detalle').empty();
+                var name = $(this).get(0).files[0].name;
+                $('#paciente').empty();
+                if ($(this).get(0).files[0] == null) {
+                    $('#foto').attr('src', null);
+                } else {
+                    if (name.endsWith('.png') | name.endsWith('.jpg') | name.endsWith('.jpeg') | name.endsWith('.PNG') | name.endsWith('.JPG') | name.endsWith('.JPEG')){
+                        kendoPanelbar.collapse($("li", panelbar.element));
+                        $('#pdf').show();
+                        readURL(this);
+                    }
+                    else {
+                        $('#pdf').hide();
+                        $("#imgInp").val(null);
+                        $('#detalle').html("<p id='error'>"+language.exterror+"</p>");
+                        setTimeout(function() {
+                            $("#error").hide();
+                        }, 2000);
+                    }
+                }
+            }
+        });
+
+
+        function uploadfile() {
+            var form_data = new FormData();
+            $.getJSON("/dni?dni=" + $("#dni").val(),
+                function(data) {
+                    if (data.length < 1) {
+                        $('#detalle').html("<p id='error'>"+language.notexist+"</p>");
+                        $('#paciente').html("");
+                        setTimeout(function() {
+                            $("#error").hide();
+                        }, 2000);
+                    } else {
+                        var obj = actualizaRiesgo();
+                        if (obj.state == false) {
+                            $('#riesgolabel').text(mensaje(false, 0, ""));
+                            $('#riesgovalue').text('');
+                        } else {
+                            $('#riesgolabel').text(mensaje(true, obj.value, obj.name+"."));
+                            $('#riesgovalue').text(round(obj.value, 2));
+                        }
+                        var paciente = data;
+                        var file_name = $('#imgInp').prop('files')[0];
+                        var qtc_man = parseFloat($("#qtc_man").val());
+                        if (isNaN(qtc_man)) qtc_man=0;
+
+                        if (show_qtc_type==1)
+                            qtc_type = 80;
+                        else
+                            qtc_type = 0;
+                        var checked = parseInt($("input:radio[name='qtc_type']:checked").val());
+                        qtc_type = getQtc_type(qtc_type,checked);
+
+                        form_data.append('file', file_name);
+                        form_data.append('dni', data[0].dni);
+                        $('#paciente').html("");
+                        $('#detalle').html("<p id='error-computing'>"+ language.computing +"<span id='wait'>.</span></p>");
+                        window.dotsGoingUp = true;
+                        var dots = window.setInterval(function() {
+                            var wait = document.getElementById("wait");
+                            if (window.dotsGoingUp)
+                                wait.innerHTML += ".";
+                            else {
+                                wait.innerHTML = wait.innerHTML.substring(1, wait.innerHTML.length);
+                                if (wait.innerHTML === "")
+                                    window.dotsGoingUp = true;
+                            }
+                            if (wait.innerHTML.length > 9)
+                                window.dotsGoingUp = false;
+                        }, 100);
+
+                        $(function() {
+                            if (qtc_type < 0){
+                                $('#detalle').html("<p id='error'>Debe adquirir imagen o asignar valor a QTC</p>");
+                                setTimeout(function() {
+                                    $("#error").hide();
+                                }, 2000);
+                                window.clearInterval(dots);
+                            }
+                            else {
+                                if (altura < 6 || anchura < 6) {
+                                    altura = real_altura;
+                                    anchura = real_anchura;
+                                    x1 = 0;
+                                    y1 = 0;
+                                    x2 = anchura;
+                                    y2 = altura;
+                                } else {
+                                    img_anchura = $('#foto').width();
+                                    img_altura = $('#foto').height();
+                                    altura = altura * (real_altura/img_altura);
+                                    anchura = anchura * (real_anchura/img_anchura);
+                                    x1 = x1 * (real_anchura/img_anchura);
+                                    y1 = y1 * (real_altura/img_altura);
+                                    x2 = x2 * (real_anchura/img_anchura);
+                                    y2 = y2 * (real_altura/img_altura);
+                                }
+                                $('#foto').imgAreaSelect({
+                                    hide: true
+                                });
+                                $('#foto').attr('src', null);
+                                if (base64result == undefined){
+                                    base64result = '';
+                                    x1 = 0; y1 = 0;
+                                    x2 = 0; y2 = 0;
+                                    filename = 'void';
+                                }
+								//if (qtc_man>= 450) $('input:radio[name=qtc_450]').filter('[value=1]').prop('checked', true);
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '/upload',
+                                    data: {
+                                        'dni': $("#dni").val(),
+                                        'qtc_man' : qtc_man,
+                                        'qtc_type' : qtc_type,
+                                        'x1': x1,
+                                        'y1': y1,
+                                        'x2': x2,
+                                        'y2': y2,
+                                        'filename': filename,
+                                        'content': base64result,
+                                        'contexto': contexto_valor,
+                                        'fecnac': paciente[0].fecnac,
+                                        'sexo': paciente[0].sexo,
+                                        'diuretico': $("input[name='diuretico']:checked").val(),
+                                        'suero': $("input[name='suero']:checked").val(),
+										'qtc_450': $("input[name='qtc_450']:checked").val(),
+                                        'sepsis': $("input[name='sepsis']:checked").val(),
+                                        'medQT': $("input[name='medQT']:checked").val(),
+                                        'medsQT': $("input[name='medsQT']:checked").val()
+                                    },
+                                    success: function(data) {
+                                        window.clearInterval(dots);
+                                        $('#imgInp').val(null);
+                                        //$('#detalle').html("");
+                                        $("#error").hide();
+                                        if (data.status == '501') {
+                                            $('#detalle').html("<p id='error' style='color:red;font-size:150%'>" + language.qtcerror + "</p>");
+                                            setTimeout(function() {
+                                                $("#error").hide();
+                                            }, 2000);
+                                        } else {
+                                            $("#options").html("<p><a class='button2' href='/ecg'>Nueva ECG</a><a class='button2' href='/'>Enlace a Menu</a></p>");
+                                            $("#entradas").hide();
+                                            resetContexto();
+                                            $('#foto').imgAreaSelect({
+                                                hide: true
+                                            });
+                                            $('#foto').attr('src', '');
+                                            var vp = vistapaciente(paciente[0], data[0]);
+                                            $('#paciente').html(vp);
+                                            var sexo = paciente[0].sexo;
+                                            var edad = calculaEdad(paciente[0].fecnac) >= 68;
+                                            var iam = paciente[0].iam;
+                                            var cardiaco = paciente[0].cardiaco;
+                                            var data0 = new Array(); data0[0] = data[0];
+                                            var html = tabla(data0, edad, sexo, iam, cardiaco);
+                                            $('#detalle').html(html);
+                                            var rows = data.length;
+                                            for (var i = 0; i < rows; i++) {
+                                                 $("#panelbar" + i).kendoPanelBar();
+                                                 panelbar[i] = $("#panelmedidas" + i).kendoPanelBar();
+                                            }
+                                            $('#divmedidas').change(function() {
+                                                 actualizaMedidas(' + String(medidas_last_id) + ')
+                                            });
+
+                                            // Cambiamos url de boton volver
+                                            $('#page_back').attr('href', '/ecg')
+
+
+                                            if (data[0].status_imagen  == 501) {
+                                                $('#detalle2').html("<p id='error'>"+ language.qtcerror + "</p>");
+                                                setTimeout(function() {
+                                                     $("#error").hide();
+                                                }, 3000);
+                                            }
+
+                                        }
+                                    },
+                                })
+                            }
+                        });
+                    }
+                });
+        }
+
+        function getQtc_type(qtc_type, checked){
+            type = 0;
+            qtc_man = $("#qtc_man").val();
+            if (qtc_type < 80){
+                if ((base64result != undefined) && (qtc_man > 0)) {
+                    type = 2;
+                } else if ((base64result == undefined) && (qtc_man > 0)) {
+                    type = 1;
+                } else if ((base64result != undefined) && (qtc_man <= 0)) {
+                    type = 0;
+                } else {
+                    type = -1;
+                }
+            }
+            else {
+				type = 80 + checked;
+                if (((base64result  == undefined) && (type == 80)) || ((qtc_man <= 0) && (type == 81)))
+					type = -1;
+            }
+
+            return type;
+        }
+
+        function vistapaciente(paciente, ecg) {
+            var sdt = new Date(paciente.fecnac);
+            var sexo_label = [language.male, language.female];
+            var ctx = paciente.contexto;
+            var difdt = new Date(new Date() - sdt);
+            var edad = (difdt.toISOString().slice(0, 4) - 1970) + " " + language.years;
+            var iconval = parseFloat(ecg.alarma);
+            var icon = 'verde';
+            if (iconval > 0.66) icon = 'rojo';
+            if ((iconval > 0.33) && (iconval <= 0.66)) icon = 'amarillo';
+            var res = '<hr/><p>' + paciente.apellidos + ', ' + paciente.nombre;
+            res += ' (' + sexo_label[paciente.sexo] + '): ' + edad + '</p>';
+            return res;
+        }
+
+        function round(value, decimals) {
+            return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+        }
+
+        function tabla(data, edad, sexo, iam, cardiaco) {
+            var tag = ["no", "si"];
+            var hm = [language.male, language.female];
+            var checked_0 = ["checked", ""];
+            var checked_1 = ["", "checked"];
+            if (data.length > 0) {
+                var html = '<div style="border:1px solid #000;"><p>' + language.riskcontext + '</p>';
+                html += '<img src="static/images/contexto.png" style="width: 50%;display: block;margin-left: auto; margin-right: auto;"/>';
+                html += '<p>' + factors_legend + '</p></div><div style="padding: 0 0 5px 0;"/>';
+                html += '<table>';
+                html += '<tr>';
+                html += '<th>' + language.date + '</th>';
+                html += '<th>ECG</th>';
+                html += '<th>QTc</th>';
+                html += '<th>&Delta;QTc</th>';
+                html += '<th style="width: 40%;">' + language.riskcontext + '</th>';
+                html += '<th colspan="2">' + language.risklevel + '</th>';
+                html += '</tr>';
+
+                $.each(data, function(k, item) {
+                    var iconval = parseFloat(item.alarma);
+                    var icon_b = '#92d050'; // verde
+                    if (iconval > 0.66) icon_b = '#ed3a22'; // rojo
+                    if ((iconval > 0.33) && (iconval <= 0.66)) icon_b = '#ffbf00'; // orange
+                    //if (edad==false) edad=0; else edad=1;
+                    if (calculaEdad(item.fecnac) < 68) edad = 0;
+                    else edad = 1;
+                    sexo = item.sexo;
+                    html += '<tr>';
+                    html += '<td rowspan="2">' + item.time + '<div style="margin: 0 auto; margin-top: 10px; text-align: center">';
+                    html += '<a class="button4" href="ecgedit?id='+ item.id +'&qtc_type=' + item.qtc_type + '"><font color="white">' + language.edit + '</font></a></div></td>';
+                    var url_clip = 'ecgdraw?id=' + item.id ;
+                    var url_clip_full = 'ecgdrawfull?id=' + item.id ;
+                    if (item.qtc>0){
+                        html += '<td><a onclick="showImageModal(' + "'" + url_clip + "'" + ')"><img src="/static/images/logo-small.png" width="20" style="display: block;margin-left: auto; margin-right: auto;"/></a>';
+                        html += '<a onclick="showImageModal(' + "'" + url_clip_full + "'" + ')"><img src="/static/images/logo-ecg.png" width="80" style="display: block;margin: auto auto -14px auto;"/></a></td>';
+					    html += '<td>' + item.qtc + '</td>';
+					    html += '<td>' + item.incremento + '</td>';
+					}
+					else {
+					    html += '<td></td><td></td><td></td>';
+					}
+
+                    var coef = 5/21;
+                    var sumapuntos = edad * coef + sexo * coef + item.diuretico * coef + item.suero * coef * 2 + item.qtc_450 * coef * 2 + iam * coef * 2 + item.sepsis * coef * 3 + item.medQT * coef * 3 + item.medsQT * coef * 3 + cardiaco * coef * 3;
+                    html += '<td><ul id="panelbar' + k + '" class="ra-well-overlay"><li>' + language.risk + ': ' + round(sumapuntos, 2) + '<div>';
+                    html += '<div class=' + tag[edad] + '> ' + language.riskfactor1 + '</div>';
+                    html += '<div class=' + tag[sexo] + '>' + hm[sexo] + '</div>';
+                    html += '<div class=' + tag[item.diuretico] + '> ' + language.riskfactor3 + '</div>';
+                    html += '<div class=' + tag[item.suero] + '> ' + language.riskfactor4 + '</div>';
+                    html += '<div class=' + tag[item.qtc_450] + '> ' + language.riskfactor10 + '</div>';					
+                    html += '<div class=' + tag[iam] + '> ' + language.riskfactor5 + '</div>';
+                    html += '<div class=' + tag[item.sepsis] + '> ' + language.riskfactor6 + '</div>';
+                    html += '<div class=' + tag[item.medQT] + '> ' + language.riskfactor7 + '</div>';
+                    html += '<div class=' + tag[item.medsQT] + '> ' + language.riskfactor8 + '</div>';
+                    html += '<div class=' + tag[cardiaco] + '> ' + language.riskfactor9 + '</div>';
+                    html += '</div></li></ul></td>';
+
+                    if (item.qtc>0){
+                        html += '<td style="background-color:' + icon_b + '"></td>';
+                        html += '<td style="text-align:center;">' + item.alarma + '</td>';}
+                    else {
+                        html += '<td>&nbsp;</td><td></td>';
+                    }
+                    // Second row Qtc_man
+					iconval = parseFloat(item.alarma_man);
+                    icon_b = '#92d050'; // verde
+                    if (iconval > 0.66) icon_b = '#cb3234'; // rojo
+                    if ((iconval > 0.33) && (iconval <= 0.66)) icon_b = '#ffbf00'; // orange
+                    html += '<tr>';
+                    if (item.qtc_man>0){
+                        html += '<td></td>';
+                        html += '<td>' + item.qtc_man + '</td>';
+                        html += '<td>' + item.incremento_man + '</td>';
+                        html += '<td></td>';
+                        html += '<td style="background-color:' + icon_b + '"></td>';
+                        html += '<td style="text-align:center;">' + item.alarma_man + '</td>';
+                    }
+                    else {
+                        html += '<td>&nbsp;</td><td></td><td></td><td></td><td></td>';
+                    }
+                    html += '</tr>';
+
+                    // Medidas adoptadas
+                    html += '<tr><th colspan="4">' + language.actions + '</th>';
+                    html += '<th colspan="3">' + language.remarks + '</th></tr>';
+                    var num_medidas = parseInt(item.m1) + parseInt(item.m2) + parseInt(item.m3) + parseInt(item.m4) + parseInt(item.m5);
+                    html += '<td colspan="4"><ul id="panelmedidas' + k + '" class="ra-well-overlay"><li class="k-state-active"><span id="numedidas' + k + '">' + language.number + ': ' + num_medidas + '</span>';
+                    if (k != 0) {
+                        html += '<div>';
+                        html += '<div class=' + tag[item.m1] + '> ' + language.action1 + '</div>';
+                        html += '<div class=' + tag[item.m2] + '> ' + language.action2 + '</div>';
+                        html += '<div class=' + tag[item.m3] + '> ' + language.action3 + '</div>';
+                    } else {
+                        html += '<div id="divmedidas">';
+                        html += '<span>' + language.tag_no + ' ' +language.tag_yes + '</span>';
+                        html += '<div>' +
+                            '<input type="radio" name="m1" value="0" ' + checked_0[item.m1] + '>' +
+                            '<input type="radio" name="m1" value="1" ' + checked_1[item.m1] + '><label class="med">' + language.action1 + '</label>' +
+                            '</div>';
+                        html += '<div>' +
+                            '<input type="radio" name="m2" value="0" ' + checked_0[item.m2] + '>' +
+                            '<input type="radio" name="m2" value="1" ' + checked_1[item.m2] + '><label class="med">' + language.action2 + '</label>' +
+                            '</div>';
+                        html += '<div>' +
+                            '<input type="radio" name="m3" value="0" ' + checked_0[item.m3] + '>' +
+                            '<input type="radio" name="m3" value="1" ' + checked_1[item.m3] + '><label class="med">' + language.action3 + '</label>' +
+                            '</div>';
+
+                        medidas_last_id = item.id;
+                       }
+                       html += '</div></li></ul></td>';
+                       html += '<td colspan="3"><textarea class="observaciones" name="observaciones" id="observaciones" cols="30" rows="6" ></textarea></td></tr>';
+                       html += '<tr><td colspan="4"></td><td colspan="3" align="center">';
+                       html += '<a class="button4" href="#" onclick="actualizaObservaciones();"><font color="white">' + language.actualiza + '</font></a></td></tr>';
+
+                });
+                html += '<tr style="height:80px;"><td colspan=7 style="text-align: center;">';
+                html += '<a onclick="gotoHistorial(3)">' + language.historial + '</a>';
+                html += '</td></tr>';
+                html += '</table>';
+
+            } else {
+                html = '0';
+            }
+            return html;
+        }
+
+
+        function gotoHistorial(dni){
+                window.location.replace("historial?dni="+ $("#dni").val());
+        }
+
+        function grafica(url) {
+            var win = window.open(url, '_blank');
+            win.focus();
+        }
+
+        // Comprueba si es basal para ese paciente
+        $('#basal').change(function() {
+           var status = $('#basal').is(":checked");
+           if (status==true){
+              $("#qtc_type_0").show();
+              $("#qtc_type_1").show();
+              show_qtc_type = 1;
+           }
+           else{
+              $("#qtc_type_0").hide();
+              $("#qtc_type_1").hide();
+              show_qtc_type = 0;
+           }
+        });
+
+        $('#contexto input').change(function() {
+            var obj = actualizaRiesgo();
+            if (obj.state == false) {
+                $('#riesgolabel').text(mensaje(false, 0, ""));
+            } else {
+                $('#riesgolabel').text(mensaje(true, obj.value, obj.name+"."));
+            }
+        });
+
+
+        $('#dni').change(function() {
+            var obj = actualizaRiesgo();
+            if (obj.state == false) {
+                $('#riesgolabel').text(mensaje(false, 0, ""));
+            } else {
+                $('#riesgolabel').text(mensaje(true, obj.value, obj.name+"."));
+            }
+        });
+
+
+        function mensaje(state, valor, name) {
+            var msg = [language.risk_undefined, language.risk_low, language.risk_average, language.risk_high];
+            var riesgo_str = language.risk_string;
+            var idx = 0;
+            if (state == false) {
+                idx = 0;
+            } else {
+                idx = 2;
+                if (valor <= 1.58) idx = 1;
+                if (valor >= 2.39) idx = 3;
+            }
+            var mensaje = riesgo_str + name + " " + msg[idx] + " " + round(valor, 2);
+            return mensaje;
+        }
+
+
+        function actualizaRiesgo() {
+            var dni_valor = $('#dni').val();
+            res = getObjectByValue(Pacientes, "dni", dni_valor)[0];
+            var state = false;
+            var sumapuntos = null;
+            if (res != null) {
+                state = true;
+                var nombre_paciente = res.apellidos+', '+res.nombre;
+                var fecnac = res.fecnac;
+                var sexo = res.sexo;
+                var iam = res.iam;
+                var cardiaco = res.cardiaco;
+                var e = calculaEdad(fecnac);
+                var edad = parseInt((e >= 68) ? 1 : 0);
+                var sexo = parseInt(sexo);
+                var diuretico = parseInt($("input[name='diuretico']:checked").val());
+                var suero = parseInt($("input[name='suero']:checked").val());
+                var qtc_450 = parseInt($("input[name='qtc_450']:checked").val()); 			
+                var sepsis = parseInt($("input[name='sepsis']:checked").val());
+                var medQT = parseInt($("input[name='medQT']:checked").val());
+                var medsQT = parseInt($("input[name='medsQT']:checked").val());
+                var coef = 5/21;
+                sumapuntos = edad * coef + sexo * coef + diuretico * coef + suero * coef * 2 + qtc_450 * coef * 2 + iam * coef * 2 + sepsis * coef * 3 + medQT * coef * 3 + medsQT * coef * 3 + cardiaco * coef * 3;
+				sumapuntos = round(sumapuntos,2);
+				contexto_valor = sumapuntos;
+            }
+            return {
+                state: state,
+                value: sumapuntos,
+                name: nombre_paciente
+            };
+        }
+
+
+        function resetContexto() {
+            $('#riesgolabel').text(mensaje(false, 0, ""));
+            $('input:radio[name=diuretico]').filter('[value=0]').prop('checked', true);
+            $('input:radio[name=suero]').filter('[value=0]').prop('checked', true);
+			$('input:radio[name=qtc_450]').filter('[value=0]').prop('checked', true);
+            $('input:radio[name=sepsis]').filter('[value=0]').prop('checked', true);
+        }
+
+        function calculaEdad(fecnac) {
+            var sdt = new Date(fecnac);
+            var difdt = new Date(new Date() - sdt);
+            var edad = (difdt.toISOString().slice(0, 4) - 1970);
+            return edad;
+        }
+
+        function actualizaMedidas(id) {
+            // var kendoPanelbar = panelbar[0].data().kendoPanelBar;
+            // kendoPanelbar.collapse($("li", panelbar.element));
+            m1 = $("input[name='m1']:checked").val();
+            m2 = $("input[name='m2']:checked").val();
+            m3 = $("input[name='m3']:checked").val();
+            m4 = 0;
+            m5 = 0
+            num_medidas = parseInt(m1) + parseInt(m2) + parseInt(m3) + parseInt(m4) + parseInt(m5);
+            $('#numedidas0').html(num_medidas);
+            $.ajax({
+                type: 'POST',
+                url: '/medidas',
+                data: {
+                    'id': medidas_last_id,
+                    'm1': m1,
+                    'm2': m2,
+                    'm3': m3,
+                    'm4': m4,
+                    'm5': m5
+                },
+                success: function(data) {}
+            });
+        }
+
+
+        function actualizaObservaciones(){
+            $.ajax({
+                type: 'POST',
+                url: '/setecgobservaciones',
+                data: {
+                    'id': medidas_last_id,
+                    'observaciones': $("#observaciones").val()
+                },
+                success: function(data) {}
+            });
+            $('#detalle2').html("<p id='error-computing'>"+ "Observaciones actualizadas" +"</p>");
+            setTimeout(function() {
+                 $("#error-computing").hide();
+            }, 2000);
+        }
+
+    </script>
+</body>
+
+</html>

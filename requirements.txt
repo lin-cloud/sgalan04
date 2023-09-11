@@ -1,0 +1,12 @@
+flask
+sqlalchemy
+pymysql
+numpy
+scikit-fuzzy
+matplotlib
+scipy
+pdf2image
+wfdb
+pillow
+cryptography
+gunicorn==19.9.0
